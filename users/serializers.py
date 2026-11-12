@@ -26,3 +26,21 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email', 'first_name', 'last_name',
                   'phone', 'city', 'avatar', 'payments')
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ("id", "email", "first_name", "last_name",
+                  "phone", "city", "avatar", "password")
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    """Чужой профиль — только общая информация."""
+    class Meta:
+        model = User
+        fields = ("id", "email", "first_name", "avatar")

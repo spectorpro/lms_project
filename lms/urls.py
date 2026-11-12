@@ -1,22 +1,22 @@
-from django.urls import path, include
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
     CourseViewSet,
     LessonCreateAPIView,
+    LessonDestroyAPIView,
     LessonListAPIView,
     LessonRetrieveAPIView,
     LessonUpdateAPIView,
-    LessonDestroyAPIView,
 )
 
 router = DefaultRouter()
 router.register("courses", CourseViewSet)
 
 urlpatterns = [
-    path("", include(router.urls)),  # api/courses/ и api/courses/{id}/
-    path("lessons/", LessonListAPIView.as_view()),          # GET — список уроков
-    path("lessons/create/", LessonCreateAPIView.as_view()), # POST — создание
-    path("lessons/<int:pk>/", LessonRetrieveAPIView.as_view()),   # GET — один урок
-    path("lessons/<int:pk>/update/", LessonUpdateAPIView.as_view()),  # PUT/PATCH
-    path("lessons/<int:pk>/delete/", LessonDestroyAPIView.as_view()), # DELETE
-]
+    path("lessons/", LessonListAPIView.as_view(), name="lesson-list"),
+    path("lessons/create/", LessonCreateAPIView.as_view(), name="lesson-create"),
+    path("lessons/<int:pk>/", LessonRetrieveAPIView.as_view(), name="lesson-retrieve"),
+    path("lessons/<int:pk>/update/", LessonUpdateAPIView.as_view(), name="lesson-update"),
+    path("lessons/<int:pk>/delete/", LessonDestroyAPIView.as_view(), name="lesson-delete"),
+] + router.urls
