@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pythonprojectdrf"
+version = "0.1.0"
+description = ""
+authors = ["«Artyom» <«lzspector@mail.ru»>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.14"
+djangorestframework = "^3.18.3"
+django-filter = "^26.2"
+pillow = "^13.0.0"
+djangorestframework-simplejwt = "^5.5.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
