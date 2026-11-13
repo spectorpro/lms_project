@@ -1,5 +1,7 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from .validators import validate_video_url
 
 
 class Course(models.Model):
@@ -38,7 +40,13 @@ class Lesson(models.Model):
     preview = models.ImageField(
         upload_to="lms/lessons/", blank=True, null=True, verbose_name="Превью"
     )
-    video_link = models.URLField(verbose_name="Ссылка на видео")
+    video_url = models.URLField(
+        max_length=350,
+        blank=True,
+        null=True,
+        verbose_name="Ссылка на видео",
+        validators=[validate_video_url],
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -50,6 +58,30 @@ class Lesson(models.Model):
     class Meta:
         verbose_name = "Урок"
         verbose_name_plural = "Уроки"
+        ordering = ["id"]
 
     def __str__(self):
         return self.title
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name="Пользователь",
+    )
+    course = models.ForeignKey(
+        "lms.Course",
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name="Курс",
+    )
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        unique_together = ("user", "course")
+
+    def __str__(self):
+        return f"{self.user} — {self.course}"
