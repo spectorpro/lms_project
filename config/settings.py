@@ -2,10 +2,13 @@ from pathlib import Path
 import os
 from datetime import timedelta
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "ваш-секретный-ключ"
+SECRET_KEY = os.getenv("SECRET_KEY", "ваш-секретный-ключ")
 DEBUG = True
 ALLOWED_HOSTS = []
 
@@ -18,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_spectacular",   # ← документация OpenAPI
     "users",
     "lms",
 ]
@@ -26,12 +30,24 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",  # ← генерация схемы
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+# Настройки документации (Swagger / ReDoc)
+SPECTACULAR_SETTINGS = {
+    "TITLE": "LMS API",
+    "DESCRIPTION": "API онлайн-школы: курсы, уроки, подписки и платежи через Stripe",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# Stripe
+STRIPE_API_KEY = os.getenv("STRIPE_SECRET_KEY")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

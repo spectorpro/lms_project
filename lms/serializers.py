@@ -1,3 +1,4 @@
+from users.models import Payment
 from rest_framework import serializers
 from .models import Course, Lesson, Subscription
 from lms.validators import validate_video_url, VideoUrlValidator
@@ -30,3 +31,24 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = "__all__"
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = [
+            "id", "user", "payment_date", "paid_course", "paid_lesson",
+            "amount", "payment_method",  # ← обрати внимание: payment_method, а не method
+            "stripe_product_id", "stripe_price_id", "stripe_session_id",
+            "stripe_payment_url", "status",
+        ]
+        read_only_fields = [
+            "user", "payment_date",
+            "stripe_product_id", "stripe_price_id", "stripe_session_id",
+            "stripe_payment_url", "status",
+        ]
+
+    def validate(self, data):
+        if not data.get("paid_course") and not data.get("paid_lesson"):
+            raise serializers.ValidationError("Укажите курс или урок для оплаты")
+        return data
