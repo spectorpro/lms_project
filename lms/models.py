@@ -4,6 +4,7 @@ from django.db import models
 from .validators import validate_video_url
 
 
+
 class Course(models.Model):
     title = models.CharField(max_length=150, verbose_name="Название")
     preview = models.ImageField(
@@ -16,6 +17,9 @@ class Course(models.Model):
         verbose_name="Владелец",
         blank=True,
         null=True,
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, blank=True, null=True, verbose_name="Дата последнего обновления"
     )
 
     class Meta:

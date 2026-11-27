@@ -93,11 +93,33 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-# MEDIA — для загрузки картинок (превью курсов, уроков, аватарок)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Кастомный пользователь
 AUTH_USER_MODEL = "users.User"
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ENABLE_UTC = False
+
+from celery.schedules import crontab
+
+
+CELERY_BEAT_SCHEDULE = {
+    "block-inactive-users-daily": {
+        "task": "users.tasks.block_inactive_users",
+        "schedule": crontab(minute=0, hour=0),
+    },
+}
+
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.yandex.ru")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "465"))
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() == "true"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
