@@ -1,3 +1,6 @@
+from django.utils import timezone
+from datetime import timedelta
+from .tasks import send_course_update_emails
 from users.models import Payment
 from rest_framework import generics, permissions, viewsets
 from rest_framework.views import APIView
@@ -52,6 +55,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def perform_update(self, serializer):
+        course = serializer.save()
+        send_course_update_emails.delay(course.id)
+
     def get_permissions(self):
         if self.action == "create":
             self.permission_classes = [permissions.IsAuthenticated, ~IsModer]
@@ -93,6 +100,19 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [permissions.IsAuthenticated, IsModer | IsOwner]
+
+    def perform_update(self, serializer):
+        lesson = serializer.save()
+        course = lesson.course
+        if not course:
+            return
+
+        last_update = course.updated_at
+        if last_update and timezone.now() - last_update < timedelta(hours=4):
+            return
+
+        course.save()
+        send_course_update_emails.delay(course.id)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
